@@ -11,4 +11,4 @@ CREATE TABLE `nodepad` (
   `content` varchar(50) DEFAULT NULL COMMENT 'nodepad content ',
   PRIMARY KEY (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40101 SET character_set_client = @saved_cs_client */;     
