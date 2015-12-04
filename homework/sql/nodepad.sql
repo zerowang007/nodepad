@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS `nodepad`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `nodepad` (
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'nodepad id ',
   `title` varchar(10) DEFAULT NULL COMMENT 'nodepad tile',
   `content` varchar(50) DEFAULT NULL COMMENT 'nodepad content ',
   PRIMARY KEY (`create_time`)
