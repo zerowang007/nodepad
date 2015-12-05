@@ -1,4 +1,4 @@
-package com.zero.homework.util;
+package com.zero.homework.util.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

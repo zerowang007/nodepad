@@ -1,14 +1,8 @@
---
--- Table structure for table `nodepad`
---
-
-DROP TABLE IF EXISTS `nodepad`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `nodepad` (
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'nodepad id ',
-  `title` varchar(10) DEFAULT NULL COMMENT 'nodepad tile',
-  `content` varchar(50) DEFAULT NULL COMMENT 'nodepad content ',
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `title` varchar(10) DEFAULT NULL COMMENT 'OPN-open, CAN-cancelled, CMP-paid and transaction completed, REJ - Rejected\n',
+  `content` varchar(50) DEFAULT NULL COMMENT 'invoice no/PO no from 3rd party ',
+  `update_time` date DEFAULT NULL,
+  `del` varchar(100) DEFAULT 'N',
   PRIMARY KEY (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;     
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='purchase order from customer. customer may be member or  not member'
