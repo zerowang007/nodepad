@@ -20,29 +20,32 @@ import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.Gson;
 import com.zero.homework.domain.Nodepad;
+import com.zero.homework.util.ResponseResult;
 import com.zero.homework.util.db.DBHelper;
-import com.zero.homework.util.response.ResponseResult;
+
 
 
 public class NodepadControll extends HttpServlet{
-
+	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		resp.setContentType("text/html;charset=UTF-8");
 		String command = req.getParameter("command");
 		if("list".equalsIgnoreCase(command)){
-			List<Nodepad> list = getList();
+			List<Nodepad> list = getList("N");
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}else if("add".equalsIgnoreCase(command)){
-			add(req);
-			List<Nodepad> list = getList();
+			Nodepad pad = getNodePadFromRequest(req);
+			saveOrUpdate(pad);
+			List<Nodepad> list = getList("N");
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}else if("update".equalsIgnoreCase(command)){
-			update(req);
-			List<Nodepad> list = getList();
+			Nodepad pad = getNodePadFromRequest(req);
+			saveOrUpdate(pad);
+			List<Nodepad> list = getList("N");
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}else if("search".equalsIgnoreCase(command)){
@@ -50,27 +53,68 @@ public class NodepadControll extends HttpServlet{
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}else if("del".equalsIgnoreCase(command)){
-			delete(req);
-			List<Nodepad> list = getList();
+			Nodepad pad = getNodePadFromRequest(req);
+			pad.setDel("Y");
+			saveOrUpdate(pad);
+			List<Nodepad> list = getList("N");
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}else if("remove".equalsIgnoreCase(command)){
-			reomve(req);
-			List<Nodepad> list = getList();
+			Nodepad pad = getNodePadFromRequest(req);
+			reomve(pad);
+			List<Nodepad> list = getList("N");
+			ResponseResult result = new ResponseResult(list);
+			writeJsonToClient(resp, result);
+		}else if("restore".equalsIgnoreCase(command)){
+			Nodepad pad = getNodePadFromRequest(req);
+			pad.setDel("N");
+			saveOrUpdate(pad);
+			List<Nodepad> list = getList("N");
+			ResponseResult result = new ResponseResult(list);
+			writeJsonToClient(resp, result);
+		}else if("recycle".equalsIgnoreCase(command)){
+			List<Nodepad> list = getList("Y");
 			ResponseResult result = new ResponseResult(list);
 			writeJsonToClient(resp, result);
 		}
 	}
 
-	private void reomve(HttpServletRequest req) {
-		
+	
+	private Nodepad getNodePadFromRequest(HttpServletRequest req) {
+		String title = req.getParameter("title");
+		String content = req.getParameter("content");
+		String dateStr  = req.getParameter("createDate");
+		Nodepad pad = new Nodepad();
+		if(title!=null && !StringUtils.isEmpty(title)){
+			pad.setTitle(title);
+		}
+		if(content!=null && !StringUtils.isEmpty(content)){
+			pad.setContent(content);
+		}
+		if(dateStr!=null && !StringUtils.isEmpty(dateStr)){
+			try {
+				pad.setCreateDate(sdf.parse(dateStr));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		return pad;
+	}
+
+	private void reomve(Nodepad pad) {
+		String sql = " delete from nodepad where  create_time=? ";
+		DBHelper helper = new DBHelper(sql);
+		PreparedStatement pst = helper.pst;
+		try {
+			pst.setObject(1, pad.getCreateDate());
+			pst.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		
 	}
 
-	private void delete(HttpServletRequest req) {
-		
-		
-	}
+	
 
 	private  List<Nodepad> search(HttpServletRequest req) {
 		String sql = "select * from nodepad where 1=1 del='N'  ";
@@ -90,7 +134,6 @@ public class NodepadControll extends HttpServlet{
 			ResultSet r = helper.pst.getResultSet();
 			List<Nodepad> list = new ArrayList<Nodepad>();
 			while(r.next()){
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				String temp = sdf.format(r.getTimestamp(1));
 				Date date = sdf.parse(temp);
 				Nodepad pad = new Nodepad(date, r.getString(2), r.getString(3));
@@ -104,32 +147,61 @@ public class NodepadControll extends HttpServlet{
 		
 	}
 
-	private void update(HttpServletRequest req) {
-		String sql = "UPDATE nodepad  SET title=?, content=? WHERE create_time =?";
-		saveOrUpdate(req, sql);
-	}
-
-	private void saveOrUpdate(HttpServletRequest req, String sql) {
-		String title = req.getParameter("title");
-		String content = req.getParameter("content");
-		String dateStr  = req.getParameter("createDate");
-		DBHelper helper = new DBHelper(sql);
+	private void saveOrUpdate(Nodepad pad)  {
+		String sql = "";
 		try {
-			PreparedStatement pst = helper.pst;
-			pst.setObject(1, title);
-			pst.setObject(2, content);
-			if(null!=dateStr && !StringUtils.isEmpty(dateStr)){
-				pst.setObject(3, dateStr);
+			if(null==pad.getCreateDate()){
+				sql = "INSERT INTO nodepad ( `title`, `content`) VALUES (?,? );";
+				DBHelper helper = new DBHelper(sql);
+				PreparedStatement pst = helper.pst;
+				pst.setObject(1, pad.getTitle());
+				pst.setObject(2, pad.getContent());
+				pst.execute();
+			}else {
+				sql = "UPDATE nodepad   ";
+				List<Object> param = new ArrayList<Object>();
+				if(null!=pad.getTitle()&& !StringUtils.isEmpty(pad.getTitle())){
+					sql += " SET title=? , ";
+					param.add(pad.getTitle());
+				}
+				if(null!=pad.getContent()&& !StringUtils.isEmpty(pad.getContent())){
+					if(sql.contains("SET")){
+						sql  +=  " content=? , ";
+					}else {
+						sql  +=  " SET content=? ,";
+					}
+					param.add(pad.getContent());
+				}
+				if(null!=pad.getDel()&& !StringUtils.isEmpty(pad.getDel())){
+					if(sql.contains("SET")){
+						sql  +=  " del=? , ";
+					}else {
+						sql  +=  " SET del=? , ";
+					}
+					param.add(pad.getDel());
+				}
+				if(sql.contains("SET")){
+					sql  +=  " update_time=? , ";
+				}else {
+					sql  +=  " SET update_time=? , ";
+				}
+				param.add(new Date());
+				sql = sql.substring(0, sql.lastIndexOf(","));
+				sql +=  " where create_time=? ";
+				param.add(pad.getCreateDate());
+				DBHelper helper = new DBHelper(sql);
+				PreparedStatement pst = helper.pst;
+				if(param.size()>0){
+					for(int i=0;i<param.size();i++){
+						pst.setObject(i+1, param.get(i));
+					}
+				}
+				pst.execute();
 			}
-			pst.execute();
-		}catch (SQLException e) {
+		} catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-
-	private void add(HttpServletRequest req) {
-		String sql = "INSERT INTO nodepad ( `title`, `content`) VALUES (?,? );";
-		saveOrUpdate(req, sql);
+		
 	}
 
 	private void writeJsonToClient(HttpServletResponse resp, Object obj)
@@ -142,10 +214,16 @@ public class NodepadControll extends HttpServlet{
 		out.close();
 	}
 
-	private List<Nodepad> getList() {
-		String sql = "select * from nodepad where del='N' order by create_time desc";
-		DBHelper helper = new DBHelper(sql);
+	private List<Nodepad> getList(String flag) {
+		String sql = "select * from nodepad where del=? order by ";
 		try {
+			if("N".equalsIgnoreCase(flag)){
+				sql += " create_time desc ";
+			}else {
+				sql += " update_time desc ";
+			}
+			DBHelper helper = new DBHelper(sql);
+			helper.pst.setObject(1, flag);
 			helper.pst.execute();
 			ResultSet r = helper.pst.getResultSet();
 			List<Nodepad> list = new ArrayList<Nodepad>();
