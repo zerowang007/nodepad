@@ -1,8 +1,9 @@
 CREATE TABLE `nodepad` (
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `title` varchar(10) DEFAULT NULL COMMENT 'nodepad title',
-  `content` varchar(50) DEFAULT NULL COMMENT 'nodepad content',
+  `create_time` timestamp ,
+  `title` varchar(10) DEFAULT NULL ,
+  `content` varchar(50) DEFAULT NULL ,
   `update_time` datetime DEFAULT NULL,
   `del` varchar(100) DEFAULT 'N',
-  PRIMARY KEY (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8
