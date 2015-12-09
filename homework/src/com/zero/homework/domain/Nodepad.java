@@ -7,14 +7,14 @@ import java.util.Date;
 public class Nodepad implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
-	private Date createDate;
+	private String createDate;
 	private String  title;
 	private String content;
 	private Date updateTime;
 	private String del;
 	public Nodepad() {
 	}
-	public Nodepad(Date createDate, String title, String content) {
+	public Nodepad(String createDate, String title, String content) {
 		this.createDate = createDate;
 		this.title = title;
 		this.content = content;
@@ -32,10 +32,10 @@ public class Nodepad implements Serializable{
 	public void setDel(String del) {
 		this.del = del;
 	}
-	public Date getCreateDate() {
+	public String getCreateDate() {
 		return createDate;
 	}
-	public void setCreateDate(Date createDate) {
+	public void setCreateDate(String createDate) {
 		this.createDate = createDate;
 	}
 	public String getTitle() {

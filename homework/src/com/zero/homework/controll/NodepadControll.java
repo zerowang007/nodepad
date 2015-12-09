@@ -92,11 +92,7 @@ public class NodepadControll extends HttpServlet{
 			pad.setContent(content);
 		}
 		if(dateStr!=null && !StringUtils.isEmpty(dateStr)){
-			try {
-				pad.setCreateDate(sdf.parse(dateStr));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+			pad.setCreateDate(dateStr);
 		}
 		return pad;
 	}
@@ -135,8 +131,7 @@ public class NodepadControll extends HttpServlet{
 			List<Nodepad> list = new ArrayList<Nodepad>();
 			while(r.next()){
 				String temp = sdf.format(r.getTimestamp(1));
-				Date date = sdf.parse(temp);
-				Nodepad pad = new Nodepad(date, r.getString(2), r.getString(3));
+				Nodepad pad = new Nodepad(temp, r.getString(2), r.getString(3));
 				list.add(pad);
 			}
 			return list;
@@ -230,8 +225,7 @@ public class NodepadControll extends HttpServlet{
 			while(r.next()){
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 				String temp = sdf.format(r.getTimestamp(1));
-				Date date = sdf.parse(temp);
-				Nodepad pad = new Nodepad(date, r.getString(2), r.getString(3));
+				Nodepad pad = new Nodepad(temp, r.getString(2), r.getString(3));
 				list.add(pad);
 			}
 			return list;
